@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const fsp = fs.promises;
 
+const EXT_ID = 'dealenx.vscode-agent-plugins-example-as-vsix';
 const PLUGIN_NAME = 'vscode-agent-plugins-example-as-vsix';
 const SOURCE_DIR = __dirname;
 
@@ -38,17 +39,25 @@ async function setPathEnabled(location, enabled) {
   return next;
 }
 
-async function install(context) {
+async function copyPluginFiles(context) {
   const dest = await pluginDir(context);
   await fsp.rm(dest, { recursive: true, force: true });
   await copyDir(SOURCE_DIR, dest);
-  const result = await setPathEnabled(dest, true);
-  vscode.window.showInformationMessage(
-    `Agent plugin "${PLUGIN_NAME}" installed to ${dest} (registered via ${CONFIG_KEY}). Reload VS Code to load it.`
-  );
-  return result;
+  return dest;
 }
 
+// Install: copy plugin files + register path. Called on VSIX install (activate)
+// and manually via command.
+async function install(context) {
+  const dest = await copyPluginFiles(context);
+  await setPathEnabled(dest, true);
+  vscode.window.showInformationMessage(
+    `Agent plugin "${PLUGIN_NAME}" installed to ${dest} (registered via ${CONFIG_KEY}).`
+  );
+  return dest;
+}
+
+// Uninstall: remove plugin files + deregister path.
 async function uninstall(context) {
   const dest = await pluginDir(context);
   await fsp.rm(dest, { recursive: true, force: true });
@@ -56,11 +65,37 @@ async function uninstall(context) {
   vscode.window.showInformationMessage(`Agent plugin "${PLUGIN_NAME}" uninstalled.`);
 }
 
+// VSIX was removed while the host was still running: extensions.onDidChange
+// fires and our own extension id disappears from vscode.extensions.all.
+function watchSelfUninstall(context) {
+  const handler = () => {
+    if (!vscode.extensions.getExtension(EXT_ID)) {
+      // Extension is gone — clean up agent plugin best-effort, no UI (we're
+      // racing extension teardown).
+      uninstall(context).catch(() => {});
+    }
+  };
+  const sub = vscode.extensions.onDidChange(handler);
+  context.subscriptions.push(sub);
+}
+
 function activate(context) {
   context.subscriptions.push(
     vscode.commands.registerCommand('agentPluginInstaller.install', () => install(context)),
     vscode.commands.registerCommand('agentPluginInstaller.uninstall', () => uninstall(context))
   );
+
+  // Only auto-manage in a real installed extension, not F5 dev runs or tests.
+  if (vscode.extensionMode === undefined || vscode.ExtensionMode === undefined) return;
+  if (context.extensionMode !== vscode.ExtensionMode.Production) return;
+
+  // VSIX just installed / updated (or VS Code restarted with it present):
+  // mirror installation into Agent Plugins.
+  install(context).catch((e) =>
+    vscode.window.showErrorMessage(`Agent plugin auto-install failed: ${e.message}`)
+  );
+
+  watchSelfUninstall(context);
 }
 
 function deactivate() {}
