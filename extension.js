@@ -3,8 +3,8 @@ const path = require('path');
 const fs = require('fs');
 const fsp = fs.promises;
 
-const PLUGIN_NAME = 'agent-plugins-example';
-const SOURCE_DIR = path.join(__dirname, 'resources', PLUGIN_NAME);
+const PLUGIN_NAME = 'vscode-agent-plugins-example-as-vsix';
+const SOURCE_DIR = __dirname;
 
 // Matches VS Code's own install-from-source behavior (pluginInstallService.ts):
 // each chat.pluginLocations key points DIRECTLY to a folder containing plugin.json.
