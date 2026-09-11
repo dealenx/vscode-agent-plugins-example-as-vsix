@@ -1,1 +1,10 @@
+# build artifacts
 vsix/
+*.vsix
+
+# dependencies
+node_modules/
+
+# OS / editor
+Thumbs.db
+.DS_Store
