@@ -1,8 +1,4 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
-  "name": "vscode-agent-plugins-example-as-vsix",
-  "version": "0.0.1",
-  "description": "The agent-plugins-example Agent Plugin packaged as a VS Code extension (VSIX) that can install and uninstall itself as an Agent Plugin.",
-  "license": "MIT",
-  "keywords": ["agent-plugins", "example", "vscode", "skills"]
+  "name": "vscode-agent-plugins-example-as-vsix"
 }
