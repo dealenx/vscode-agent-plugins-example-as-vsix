@@ -3,13 +3,16 @@ const path = require('path');
 const fs = require('fs');
 const fsp = fs.promises;
 
-const EXT_ID = 'dealenx.vscode-agent-plugins-example-as-vsix';
-const PLUGIN_NAME = 'vscode-agent-plugins-example-as-vsix';
+// Identity is derived from package.json — no hardcoded publisher/name here.
+// This keeps the file template-friendly: rename the repo/package and the
+// plugin follows automatically.
+const pkg = require('./package.json');
+const EXT_ID = `${pkg.publisher}.${pkg.name}`;
+const PLUGIN_NAME = pkg.name;
 // Only files relevant to the agent plugin are mirrored into globalStorage.
 const PLUGIN_FILES = ['plugin.json', 'README.md', 'LICENSE', 'skills'];
 const SOURCE_DIR = __dirname;
 
-// Matches VS Code's own install-from-source behavior (pluginInstallService.ts):
 // each chat.pluginLocations key points DIRECTLY to a folder containing plugin.json.
 const CONFIG_KEY = 'chat.pluginLocations';
 

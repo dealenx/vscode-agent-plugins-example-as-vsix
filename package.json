@@ -14,11 +14,11 @@
     "commands": [
       {
         "command": "agentPluginInstaller.install",
-        "title": "Agent Plugin: Install vscode-agent-plugins-example-as-vsix"
+        "title": "Agent Plugin: Install this extension as plugin"
       },
       {
         "command": "agentPluginInstaller.uninstall",
-        "title": "Agent Plugin: Uninstall vscode-agent-plugins-example-as-vsix"
+        "title": "Agent Plugin: Uninstall this extension as plugin"
       }
     ]
   },
