@@ -5,6 +5,8 @@ const fsp = fs.promises;
 
 const EXT_ID = 'dealenx.vscode-agent-plugins-example-as-vsix';
 const PLUGIN_NAME = 'vscode-agent-plugins-example-as-vsix';
+// Only files relevant to the agent plugin are mirrored into globalStorage.
+const PLUGIN_FILES = ['plugin.json', 'README.md', 'LICENSE', 'skills'];
 const SOURCE_DIR = __dirname;
 
 // Matches VS Code's own install-from-source behavior (pluginInstallService.ts):
@@ -27,6 +29,25 @@ async function copyDir(src, dest) {
   }
 }
 
+// Mirror only plugin-relevant files into globalStorage.
+async function copyPluginFilesInto(src, dest) {
+  await fsp.rm(dest, { recursive: true, force: true });
+  await fsp.mkdir(dest, { recursive: true });
+  for (const name of PLUGIN_FILES) {
+    const s = path.join(src, name);
+    const st = await fsp.stat(s).catch(() => null);
+    if (!st) continue;
+    if (st.isDirectory()) await copyDir(s, path.join(dest, name));
+    else await fsp.copyFile(s, path.join(dest, name));
+  }
+}
+
+async function copyPluginFiles(context) {
+  const dest = await pluginDir(context);
+  await copyPluginFilesInto(SOURCE_DIR, dest);
+  return dest;
+}
+
 async function setPathEnabled(location, enabled) {
   const cfg = vscode.workspace.getConfiguration();
   const current = cfg.inspect(CONFIG_KEY).userValue || {};
@@ -37,13 +58,6 @@ async function setPathEnabled(location, enabled) {
   if (enabled) next[location] = true;
   await cfg.update(CONFIG_KEY, next, vscode.ConfigurationTarget.Global);
   return next;
-}
-
-async function copyPluginFiles(context) {
-  const dest = await pluginDir(context);
-  await fsp.rm(dest, { recursive: true, force: true });
-  await copyDir(SOURCE_DIR, dest);
-  return dest;
 }
 
 // Install: copy plugin files + register path. Called on VSIX install (activate)
@@ -84,9 +98,6 @@ function activate(context) {
     vscode.commands.registerCommand('agentPluginInstaller.install', () => install(context)),
     vscode.commands.registerCommand('agentPluginInstaller.uninstall', () => uninstall(context))
   );
-
-  // Only auto-manage in a real installed extension, not F5 dev runs or tests.
-  if (vscode.extensionMode === undefined || vscode.ExtensionMode === undefined) return;
   if (context.extensionMode !== vscode.ExtensionMode.Production) return;
 
   // VSIX just installed / updated (or VS Code restarted with it present):
