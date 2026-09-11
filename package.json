@@ -1,31 +1,19 @@
 {
   "name": "vscode-agent-plugins-example-as-vsix",
   "displayName": "Agent Plugins Example as VSIX",
-  "description": "Installs/uninstalls this repo as a VS Code Agent Plugin (experimental); the repo is itself a valid Agent Plugin.",
+  "description": "Installs/uninstalls itself as a VS Code Agent Plugin (experimental).",
   "version": "0.0.1",
   "publisher": "dealenx",
   "license": "MIT",
   "engines": { "vscode": "^1.110.0" },
-  "categories": ["Other"],
   "activationEvents": ["onStartupFinished"],
   "main": "./extension.js",
-  "repository": { "type": "git", "url": "https://github.com/dealenx/vscode-agent-plugins-example-as-vsix" },
+  "repository": "github:dealenx/vscode-agent-plugins-example-as-vsix",
   "contributes": {
     "commands": [
-      {
-        "command": "agentPluginInstaller.install",
-        "title": "Agent Plugin: Install this extension as plugin"
-      },
-      {
-        "command": "agentPluginInstaller.uninstall",
-        "title": "Agent Plugin: Uninstall this extension as plugin"
-      }
+      { "command": "agentPluginInstaller.install", "title": "Agent Plugin: Install this extension as plugin" },
+      { "command": "agentPluginInstaller.uninstall", "title": "Agent Plugin: Uninstall this extension as plugin" }
     ]
   },
-  "scripts": {
-    "package": "vsce package"
-  },
-  "devDependencies": {
-    "@types/vscode": "^1.110.0"
-  }
+  "scripts": { "package": "vsce package --no-dependencies --allow-missing-repository" }
 }
