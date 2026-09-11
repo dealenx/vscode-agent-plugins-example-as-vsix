@@ -59,24 +59,36 @@ async function setPathEnabled(location, enabled) {
   await cfg.update(CONFIG_KEY, next, vscode.ConfigurationTarget.Global);
   return next;
 }
+// Brief non-blocking notification (notification toast for ~2.5s, no buttons).
+function toast(message, ms = 2500) {
+  vscode.window.withProgress(
+    {
+      location: vscode.ProgressLocation.Notification,
+      title: `$(plug) ${message}`,
+      cancellable: false,
+    },
+    async () => {
+      await new Promise((r) => setTimeout(r, ms));
+    }
+  );
+}
+
 
 // Install: copy plugin files + register path. Called on VSIX install (activate)
 // and manually via command.
 async function install(context) {
   const dest = await copyPluginFiles(context);
   await setPathEnabled(dest, true);
-  vscode.window.showInformationMessage(
-    `Agent plugin "${PLUGIN_NAME}" installed to ${dest} (registered via ${CONFIG_KEY}).`
-  );
+  toast(`Agent plugin "${PLUGIN_NAME}" installed`);
   return dest;
 }
+
 
 // Uninstall: remove plugin files + deregister path.
 async function uninstall(context) {
   const dest = await pluginDir(context);
   await fsp.rm(dest, { recursive: true, force: true });
-  await setPathEnabled(dest, false);
-  vscode.window.showInformationMessage(`Agent plugin "${PLUGIN_NAME}" uninstalled.`);
+  toast(`Agent plugin "${PLUGIN_NAME}" uninstalled`);
 }
 
 // VSIX was removed while the host was still running: extensions.onDidChange
