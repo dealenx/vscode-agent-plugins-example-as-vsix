@@ -1,0 +1,30 @@
+{
+  "name": "agent-plugin-installer",
+  "displayName": "Agent Plugin Installer",
+  "description": "Installs/uninstalls the agent-plugins-example Agent Plugin into VS Code Agent Plugins (experimental).",
+  "version": "0.0.1",
+  "publisher": "dealenx",
+  "license": "MIT",
+  "engines": { "vscode": "^1.110.0" },
+  "categories": ["Other"],
+  "activationEvents": [],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "agentPluginInstaller.install",
+        "title": "Agent Plugin: Install agent-plugins-example"
+      },
+      {
+        "command": "agentPluginInstaller.uninstall",
+        "title": "Agent Plugin: Uninstall agent-plugins-example"
+      }
+    ]
+  },
+  "scripts": {
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.110.0"
+  }
+}
